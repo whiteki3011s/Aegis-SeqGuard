@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Password Anti-Breach Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-dark: #080c14;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(56, 189, 248, 0.3);
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a855f7;
+      
+      --glow-cyan: rgba(56, 189, 248, 0.15);
+      --glow-rose: rgba(244, 63, 94, 0.2);
+      --glow-emerald: rgba(16, 185, 129, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.04) 0%, transparent 40%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 1.5rem;
+      line-height: 1.5;
+    }
+
+    /* Layout Structure */
+    .app-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Header Bar */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.75rem;
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+    }
+
+    .brand-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.9rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-emerald);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .btn-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+
+    .btn-link:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-accent);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-accent);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .stat-icon {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+
+    .stat-value {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+    }
+
+    .stat-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    /* Main Grid Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 992px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Card Panels */
+    .panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .panel-title-icon {
+      color: var(--accent-cyan);
+    }
+
+    /* Simulation Deck */
+    .sim-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .btn-sim {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      padding: 1.2rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.02);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+      color: var(--text-main);
+    }
+
+    .btn-sim:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .btn-sim-attack {
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-sim-attack:hover {
+      background: var(--glow-rose);
+      border-color: var(--accent-rose);
+      box-shadow: 0 0 20px var(--glow-rose);
+    }
+
+    .btn-sim-legit {
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-sim-legit:hover {
+      background: var(--glow-emerald);
+      border-color: var(--accent-emerald);
+      box-shadow: 0 0 20px var(--glow-emerald);
+    }
+
+    .sim-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sim-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Manual Sandbox Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.65rem 0.9rem;
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    input:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 2px var(--glow-cyan);
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      color: #000;
+      font-weight: 700;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 15px var(--glow-cyan);
+    }
+
+    .btn-submit:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    /* Terminal Console Output */
+    .console-box {
+      background: #04070d;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      height: 260px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .console-line {
+      display: flex;
+      gap: 0.75rem;
+      word-break: break-all;
+    }
+
+    .console-time {
+      color: var(--text-dim);
+    }
+
+    .console-status-PROCESSED {
+      color: var(--accent-emerald);
+    }
+
+    .console-status-SECURITY_LOCKUP_ACTIVATED {
+      color: var(--accent-rose);
+      font-weight: 700;
+    }
+
+    .console-status-BLOCKED {
+      color: var(--accent-amber);
+      font-weight: 700;
+    }
+
+    /* Gauge Meter */
+    .threat-gauge-container {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .gauge-bar-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .gauge-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .gauge-track {
+      height: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 9999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .gauge-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, var(--accent-emerald), var(--accent-amber), var(--accent-rose));
+      border-radius: 9999px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Tables */
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    th {
+      padding: 0.75rem 1rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    td {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .badge-active {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .badge-resolved {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-action {
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--accent-emerald);
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--accent-emerald);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      background: var(--accent-emerald);
+      color: #000;
+      box-shadow: 0 0 10px var(--glow-emerald);
+    }
+
+    .code-text {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-cyan);
+      font-size: 0.8rem;
+    }
+
+    .empty-state {
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="brand-icon">🛡️</div>
+        <div class="brand-title">
+          <h1>AI Password Anti-Breaching System</h1>
+          <p>Real-Time Sequence Anomaly Detection & Microservice Defense Deck</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="status-badge">
+          <div class="pulse-dot"></div>
+          SYSTEM ACTIVE
+        </div>
+        <a href="http://127.0.0.1:8000/docs" target="_blank" class="btn-link">OpenAPI Docs ↗</a>
+      </div>
+    </header>
+
+    <!-- Metrics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>Ingested Telemetry</span>
+          <span class="stat-icon">📊</span>
+        </div>
+        <div class="stat-value" id="stat-ingested">0</div>
+        <div class="stat-sub">Authentication entry digests</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>Active Lockouts</span>
+          <span class="stat-icon">🔒</span>
+        </div>
+        <div class="stat-value" id="stat-active-lockouts" style="color: var(--accent-rose);">0</div>
+        <div class="stat-sub">Enforced security isolations</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>Isolated IP Vectors</span>
+          <span class="stat-icon">🌐</span>
+        </div>
+        <div class="stat-value" id="stat-isolated-ips" style="color: var(--accent-amber);">0</div>
+        <div class="stat-sub">Blocked source origin IPs</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span>Anomalies Intercepted</span>
+          <span class="stat-icon">⚡</span>
+        </div>
+        <div class="stat-value" id="stat-anomalies" style="color: var(--accent-cyan);">0</div>
+        <div class="stat-sub">AI pattern detections</div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="main-grid">
+
+      <!-- Left Column: Simulation & Sandbox -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-title-icon">⚡</span>
+            <span>Interactive Attack & Defense Sandbox</span>
+          </div>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted);">
+          Trigger interactive attack simulations to observe real-time AI anomaly scoring and automated security lockup response.
+        </p>
+
+        <div class="sim-buttons">
+          <button type="button" class="btn-sim btn-sim-attack" onclick="triggerAttackSim()">
+            <div class="sim-title">
+              <span>💥</span> Attack Simulation
+            </div>
+            <div class="sim-desc">
+              Simulates a rapid multi-account credential stuffing attack from a bot IP.
+            </div>
+          </button>
+
+          <button type="button" class="btn-sim btn-sim-legit" onclick="triggerLegitSim()">
+            <div class="sim-title">
+              <span>👤</span> Legit User Retry
+            </div>
+            <div class="sim-desc">
+              Simulates a single user attempting password retries with natural typing delays.
+            </div>
+          </button>
+        </div>
+
+        <div style="margin-top: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+          <h4 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">Manual Telemetry Ingestion</h4>
+          <form id="ingest-form" onsubmit="handleManualSubmit(event)" class="form-grid">
+            <div class="form-group">
+              <label>Account Identifier</label>
+              <input type="text" id="input-account" value="user_sandbox_01" required />
+            </div>
+            <div class="form-group">
+              <label>IP Address</label>
+              <input type="text" id="input-ip" value="198.51.100.88" required />
+            </div>
+            <div class="form-group">
+              <label>Character Length</label>
+              <input type="number" id="input-length" value="10" required />
+            </div>
+            <div class="form-group">
+              <label>Action</label>
+              <button type="submit" class="btn-submit">Ingest Entry</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Right Column: Radar & Console Stream -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-title-icon">📡</span>
+            <span>Real-Time Anomaly Radar & Console Log</span>
+          </div>
+        </div>
+
+        <div class="threat-gauge-container">
+          <div class="gauge-bar-wrapper">
+            <div class="gauge-label-row">
+              <span style="color: var(--text-muted);">Current Risk Score</span>
+              <span id="gauge-score-val" style="color: var(--accent-emerald);">0.00</span>
+            </div>
+            <div class="gauge-track">
+              <div class="gauge-fill" id="gauge-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="console-box" id="console-log">
+          <div class="console-line">
+            <span class="console-time">[READY]</span>
+            <span style="color: var(--text-muted);">AI Anomaly Detector listening for telemetry stream...</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Active Security Lockups Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="panel-title-icon">🔒</span>
+          <span>Active Security Lockup Registry</span>
+        </div>
+        <button type="button" class="btn-link" onclick="fetchDashboardData()">Refresh Data 🔄</button>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Lockup ID</th>
+              <th>Trigger Reason</th>
+              <th>Confidence</th>
+              <th>Target Accounts</th>
+              <th>Isolated IPs</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="lockups-table-body">
+            <tr>
+              <td colspan="7" class="empty-state">No active security lockouts. All systems operational.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Audit Incident Trail Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="panel-title-icon">📜</span>
+          <span>Security Incident Audit Trail</span>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Lockup ID</th>
+              <th>Trigger Reason</th>
+              <th>Confidence</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body">
+            <tr>
+              <td colspan="5" class="empty-state">Audit log empty.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Bulletproof API Base URL resolution for both http://127.0.0.1:8000/ AND file:/// local access
+    const getApiBase = () => {
+      if (window.location.protocol.startsWith('http')) {
+        return `${window.location.origin}/api/v1`;
+      }
+      return 'http://127.0.0.1:8000/api/v1';
+    };
+
+    const API_BASE = getApiBase();
+
+    function logConsole(message, statusClass = '') {
+      const consoleBox = document.getElementById('console-log');
+      if (!consoleBox) return;
+      
+      const timeStr = new Date().toLocaleTimeString();
+      const line = document.createElement('div');
+      line.className = 'console-line';
+      
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'console-time';
+      timeSpan.textContent = `[${timeStr}]`;
+      
+      const msgSpan = document.createElement('span');
+      if (statusClass) msgSpan.className = statusClass;
+      msgSpan.textContent = message;
+      
+      line.appendChild(timeSpan);
+      line.appendChild(msgSpan);
+      
+      consoleBox.appendChild(line);
+      consoleBox.scrollTop = consoleBox.scrollHeight;
+    }
+
+    function updateGauge(score) {
+      const fill = document.getElementById('gauge-fill');
+      const label = document.getElementById('gauge-score-val');
+      if (!fill || !label) return;
+      
+      const numericScore = parseFloat(score) || 0.0;
+      const pct = Math.min(100, Math.max(0, numericScore * 100));
+      fill.style.width = pct + '%';
+      label.textContent = numericScore.toFixed(4);
+
+      if (numericScore >= 0.75) {
+        label.style.color = 'var(--accent-rose)';
+      } else if (numericScore >= 0.45) {
+        label.style.color = 'var(--accent-amber)';
+      } else {
+        label.style.color = 'var(--accent-emerald)';
+      }
+    }
+
+    async function fetchDashboardData() {
+      try {
+        const statsRes = await fetch(`${API_BASE}/stats`);
+        if (statsRes.ok) {
+          const stats = await statsRes.json();
+          document.getElementById('stat-ingested').textContent = stats.total_ingested;
+          document.getElementById('stat-active-lockouts').textContent = stats.active_lockouts;
+          document.getElementById('stat-isolated-ips').textContent = stats.isolated_ips;
+          document.getElementById('stat-anomalies').textContent = stats.total_anomalies;
+        }
+
+        const lockupsRes = await fetch(`${API_BASE}/lockups/active`);
+        if (lockupsRes.ok) {
+          const lockups = await lockupsRes.json();
+          renderActiveLockups(lockups);
+        }
+
+        const incidentsRes = await fetch(`${API_BASE}/incidents`);
+        if (incidentsRes.ok) {
+          const incidents = await incidentsRes.json();
+          renderAuditTrail(incidents);
+        }
+      } catch (err) {
+        console.error('Error refreshing dashboard:', err);
+      }
+    }
+
+    function renderActiveLockups(lockups) {
+      const tbody = document.getElementById('lockups-table-body');
+      if (!tbody) return;
+      
+      if (!lockups || lockups.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No active security lockouts. All systems operational.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = lockups.map(item => `
+        <tr>
+          <td class="code-text">${(item.lockup_id || '').substring(0, 8)}...</td>
+          <td><span class="badge badge-active">${item.trigger_reason}</span></td>
+          <td class="code-text">${((item.confidence_score || 0) * 100).toFixed(1)}%</td>
+          <td class="code-text">${(item.locked_account_digests || []).length} accounts</td>
+          <td class="code-text">${(item.isolated_ip_hashes || []).length} IPs</td>
+          <td><span class="badge badge-active">${item.status}</span></td>
+          <td>
+            <button type="button" class="btn-action" onclick="resolveLockup('${item.lockup_id}')">Resolve & Unblock</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAuditTrail(incidents) {
+      const tbody = document.getElementById('audit-table-body');
+      if (!tbody) return;
+      
+      if (!incidents || incidents.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Audit log empty.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = incidents.slice().reverse().map(item => {
+        const date = new Date((item.triggered_at || Date.now() / 1000) * 1000).toLocaleTimeString();
+        const badgeClass = item.status === 'ACTIVE' ? 'badge-active' : 'badge-resolved';
+        return `
+          <tr>
+            <td class="console-time">${date}</td>
+            <td class="code-text">${(item.lockup_id || '').substring(0, 8)}...</td>
+            <td>${item.trigger_reason}</td>
+            <td class="code-text">${((item.confidence_score || 0) * 100).toFixed(1)}%</td>
+            <td><span class="badge ${badgeClass}">${item.status}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function triggerAttackSim() {
+      logConsole("Initiating multi-account credential stuffing attack simulation...", "console-status-SECURITY_LOCKUP_ACTIVATED");
+      try {
+        const res = await fetch(`${API_BASE}/simulation/attack`, { method: 'POST' });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status} ${res.statusText}`);
+        }
+        const data = await res.json();
+        
+        if (data && data.results) {
+          data.results.forEach(r => {
+            const scoreStr = r.anomaly_score !== undefined ? ` Score=${r.anomaly_score}` : '';
+            logConsole(`Attempt ${r.attempt_number} [Target: ${r.target_account}] -> Status: ${r.status}${scoreStr}`, `console-status-${r.status}`);
+            if (r.anomaly_score !== undefined) {
+              updateGauge(r.anomaly_score);
+            }
+          });
+        }
+        
+        fetchDashboardData();
+      } catch (err) {
+        logConsole(`Simulation error: ${err.message}`, 'console-status-SECURITY_LOCKUP_ACTIVATED');
+      }
+    }
+
+    async function triggerLegitSim() {
+      logConsole("Initiating single-user password retry simulation...", "console-status-PROCESSED");
+      try {
+        const res = await fetch(`${API_BASE}/simulation/legit`, { method: 'POST' });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status} ${res.statusText}`);
+        }
+        const data = await res.json();
+
+        if (data && data.results) {
+          data.results.forEach(r => {
+            logConsole(`Attempt ${r.attempt_number} [Single User Retry] -> Status: ${r.status} Score=${r.anomaly_score}`, `console-status-${r.status}`);
+            updateGauge(r.anomaly_score);
+          });
+        }
+
+        fetchDashboardData();
+      } catch (err) {
+        logConsole(`Simulation error: ${err.message}`, 'console-status-SECURITY_LOCKUP_ACTIVATED');
+      }
+    }
+
+    async function handleManualSubmit(e) {
+      e.preventDefault();
+      const account = document.getElementById('input-account').value;
+      const ip = document.getElementById('input-ip').value;
+      const charLength = parseInt(document.getElementById('input-length').value, 10);
+
+      const payload = {
+        account_identifier: account,
+        ip_address: ip,
+        char_length: charLength,
+        timestamp: Date.now() / 1000
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/telemetry/ingest`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status} ${res.statusText}`);
+        }
+        const data = await res.json();
+        const scoreStr = data.anomaly_score !== undefined ? ` Score=${data.anomaly_score}` : '';
+        logConsole(`Manual Ingest [${account}] -> Status: ${data.status}${scoreStr}`, `console-status-${data.status}`);
+        
+        if (data.anomaly_score !== undefined) {
+          updateGauge(data.anomaly_score);
+        }
+        fetchDashboardData();
+      } catch (err) {
+        logConsole(`Manual submit error: ${err.message}`, 'console-status-SECURITY_LOCKUP_ACTIVATED');
+      }
+    }
+
+    async function resolveLockup(lockupId) {
+      try {
+        const res = await fetch(`${API_BASE}/lockup/resolve/${lockupId}`, { method: 'POST' });
+        if (res.ok) {
+          logConsole(`Resolved lockup ID: ${(lockupId || '').substring(0, 8)}... IP vector unblocked!`, 'console-status-PROCESSED');
+          fetchDashboardData();
+        }
+      } catch (err) {
+        logConsole(`Resolve error: ${err.message}`, 'console-status-SECURITY_LOCKUP_ACTIVATED');
+      }
+    }
+
+    // Auto refresh data every 5 seconds
+    fetchDashboardData();
+    setInterval(fetchDashboardData, 5000);
+  </script>
+</body>
+</html>

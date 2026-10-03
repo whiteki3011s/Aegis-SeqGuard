@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AntiBreachAPISchema",
+  "type": "object",
+  "definitions": {
+    "TelemetryIngestRequest": {
+      "type": "object",
+      "required": ["account_identifier", "ip_address", "char_length", "timestamp"],
+      "properties": {
+        "account_identifier": { "type": "string" },
+        "ip_address": { "type": "string" },
+        "char_length": { "type": "integer", "minimum": 1 },
+        "user_agent": { "type": "string" },
+        "timestamp": { "type": "number" }
+      }
+    },
+    "TelemetryIngestResponse": {
+      "type": "object",
+      "required": ["status", "anomaly_score", "lockup_activated"],
+      "properties": {
+        "status": { "type": "string" },
+        "anomaly_score": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "lockup_activated": { "type": "boolean" },
+        "lockup_id": { "type": ["string", "null"] }
+      }
+    },
+    "LockupIncidentReport": {
+      "type": "object",
+      "required": ["lockup_id", "triggered_at", "trigger_reason", "confidence_score", "status"],
+      "properties": {
+        "lockup_id": { "type": "string" },
+        "triggered_at": { "type": "number" },
+        "trigger_reason": { "type": "string" },
+        "confidence_score": { "type": "number" },
+        "locked_account_digests": { "type": "array", "items": { "type": "string" } },
+        "isolated_ip_hashes": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string" }
+      }
+    }
+  }
+}
